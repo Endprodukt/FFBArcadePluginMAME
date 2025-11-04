@@ -235,8 +235,7 @@ std::string midnruna2("midnruna2");
 std::string midnrunj("midnrunj");
 std::string roadedge("roadegde");
 std::string xrally("xrally");
-std::string thrilld("thrilld");git remote remove origin
-
+std::string thrilld("thrilld");
 std::string thrillda("thrillda");
 std::string thrillde("thrillde");
 std::string thrilldj("thrilldj");
