@@ -233,7 +233,7 @@ std::string midnrun("midnrun");
 std::string midnruna("midnruna");
 std::string midnruna2("midnruna2");
 std::string midnrunj("midnrunj");
-std::string roadedge("roadegde");
+std::string roadedge("roadedge");
 std::string xrally("xrally");
 std::string thrilld("thrilld");
 std::string thrillda("thrillda");
@@ -2319,6 +2319,7 @@ void MAMESupermodel::FFBLoop(EffectConstants* constants, Helpers* helpers, Effec
 
 				RunningFFB = "RacingFullValueActive2";
 			}
+
 			if (romname == roadedge)
 			{
 				configMinForce = configMinForceRoadEdge;
