@@ -882,7 +882,7 @@ EffectTriggers t;
 bool CustomStrength = false;
 bool WaitForGame = false;
 bool keepRunning = true;
-bool isConstantEffectRunning = false;
+//bool isConstantEffectRunning = false;
 float wheel = 0.0f;
 
 SDL_Joystick* GameController = NULL;
@@ -1315,18 +1315,19 @@ void TriggerConstantEffect(int direction, double strength)
 
 	tempEffect.constant.level = level;
 
-	//SDL_HapticUpdateEffect(haptic, effects.effect_constant_id, &tempEffect);
-	//SDL_HapticRunEffect(haptic, effects.effect_constant_id, 1);
-	// Aktualisiere IMMER die Parameter (Stärke) des Effekts
 	SDL_HapticUpdateEffect(haptic, effects.effect_constant_id, &tempEffect);
+	SDL_HapticRunEffect(haptic, effects.effect_constant_id, 1);
+	
+	// Aktualisiere IMMER die Parameter (Stärke) des Effekts
+	//SDL_HapticUpdateEffect(haptic, effects.effect_constant_id, &tempEffect);
 
 	// Starte den Effekt NUR, wenn er noch NICHT läuft.
 	// SDL_HAPTIC_INFINITY sorgt dafür, dass die Kraft dauerhaft läuft.
-	if (!isConstantEffectRunning)
-	{
-		SDL_HapticRunEffect(haptic, effects.effect_constant_id, SDL_HAPTIC_INFINITY);
-		isConstantEffectRunning = true;
-	}
+	//if (!isConstantEffectRunning)
+	//{
+	//	SDL_HapticRunEffect(haptic, effects.effect_constant_id, SDL_HAPTIC_INFINITY);
+	//	isConstantEffectRunning = true;
+	//}
 
 }
 
