@@ -3620,7 +3620,7 @@ void MAMESupermodel::FFBLoop(EffectConstants* constants, Helpers* helpers, Effec
 				double percentForce = 0.5;
 				double percentLength = 100;
 				triggers->Rumble(0, percentForce, percentLength);
-				triggers->Constant(constants->DIRECTION_FROM_RIGHT, percentForce);
+				triggers->ConstantTimed(constants->DIRECTION_FROM_RIGHT, percentForce);
 			}
 			else if ((stateFFB == 0x60) || (stateFFB == 0x6F))
 			{
@@ -3628,7 +3628,7 @@ void MAMESupermodel::FFBLoop(EffectConstants* constants, Helpers* helpers, Effec
 				double percentForce = 0.5;
 				double percentLength = 100;
 				triggers->Rumble(percentForce, 0, percentLength);
-				triggers->Constant(constants->DIRECTION_FROM_LEFT, percentForce);
+				triggers->ConstantTimed(constants->DIRECTION_FROM_LEFT, percentForce);
 			}
 		}
 
@@ -3732,7 +3732,7 @@ void MAMESupermodel::FFBLoop(EffectConstants* constants, Helpers* helpers, Effec
 					double percentForce = (stateFFB - 79) / 8.0;
 					double percentLength = 100;
 					triggers->Rumble(0, percentForce, percentLength);
-					triggers->Constant(constants->DIRECTION_FROM_RIGHT, percentForce);
+					triggers->ConstantTimed(constants->DIRECTION_FROM_RIGHT, percentForce);
 				}
 				else if ((stateFFB > 0x5F) && (stateFFB < 0x68))
 				{
@@ -3740,7 +3740,7 @@ void MAMESupermodel::FFBLoop(EffectConstants* constants, Helpers* helpers, Effec
 					double percentForce = (stateFFB - 95) / 8.0;
 					double percentLength = 100;
 					triggers->Rumble(percentForce, 0, percentLength);
-					triggers->Constant(constants->DIRECTION_FROM_LEFT, percentForce);
+					triggers->ConstantTimed(constants->DIRECTION_FROM_LEFT, percentForce);
 				}
 
 			}
@@ -4825,6 +4825,10 @@ void MAMESupermodel::FFBLoop(EffectConstants* constants, Helpers* helpers, Effec
 				std::string ffs = std::to_string(FFBNamco);
 				helpers->log((char*)ffs.c_str());
 
+				// Initialisiere die Stop-Logik am Anfang (wird später überschrieben)
+				bool constantForceSent = false;
+
+
 				if ((FFBNamco >= 0x00) && (FFBNamco < 0x77A))
 				{
 					double percentForce = (FFBNamco / Divide);
@@ -4835,6 +4839,7 @@ void MAMESupermodel::FFBLoop(EffectConstants* constants, Helpers* helpers, Effec
 					}
 					triggers->Rumble(0, percentForce, percentLength);
 					triggers->Constant(constants->DIRECTION_FROM_RIGHT, percentForce);
+					constantForceSent = true; // Markiere, dass eine aktive Kraft gesendet wurde
 				}
 				else if ((FFBNamco > 0xF886) && (FFBNamco < 0x10000))
 				{
@@ -4846,6 +4851,14 @@ void MAMESupermodel::FFBLoop(EffectConstants* constants, Helpers* helpers, Effec
 					}
 					triggers->Rumble(percentForce, 0, percentLength);
 					triggers->Constant(constants->DIRECTION_FROM_LEFT, percentForce);
+					constantForceSent = true; // Markiere, dass eine aktive Kraft gesendet wurde
+				}
+
+				// *** KORREKTUR: Explizit auf 0 setzen, wenn keine aktive Kraft gesendet wurde. ***
+				if (!constantForceSent)
+				{
+					// Sende den Befehl 0.0, um den unendlich laufenden Effekt zu stoppen.
+					triggers->Constant(constants->DIRECTION_FROM_LEFT, 0.0);
 				}
 			}
 		}

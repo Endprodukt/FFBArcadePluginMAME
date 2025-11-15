@@ -882,7 +882,7 @@ EffectTriggers t;
 bool CustomStrength = false;
 bool WaitForGame = false;
 bool keepRunning = true;
-//bool isConstantEffectRunning = false;
+bool isConstantEffectRunning = false;
 float wheel = 0.0f;
 
 SDL_Joystick* GameController = NULL;
@@ -1315,20 +1315,74 @@ void TriggerConstantEffect(int direction, double strength)
 
 	tempEffect.constant.level = level;
 
-	SDL_HapticUpdateEffect(haptic, effects.effect_constant_id, &tempEffect);
-	SDL_HapticRunEffect(haptic, effects.effect_constant_id, 1);
+	//SDL_HapticUpdateEffect(haptic, effects.effect_constant_id, &tempEffect);
+	//SDL_HapticRunEffect(haptic, effects.effect_constant_id, 1);
 	
 	// Aktualisiere IMMER die Parameter (Stärke) des Effekts
-	//SDL_HapticUpdateEffect(haptic, effects.effect_constant_id, &tempEffect);
+	SDL_HapticUpdateEffect(haptic, effects.effect_constant_id, &tempEffect);
 
 	// Starte den Effekt NUR, wenn er noch NICHT läuft.
-	// SDL_HAPTIC_INFINITY sorgt dafür, dass die Kraft dauerhaft läuft.
-	//if (!isConstantEffectRunning)
-	//{
-	//	SDL_HapticRunEffect(haptic, effects.effect_constant_id, SDL_HAPTIC_INFINITY);
-	//	isConstantEffectRunning = true;
-	//}
+	//SDL_HAPTIC_INFINITY sorgt dafür, dass die Kraft dauerhaft läuft.
+	if (!isConstantEffectRunning)
+	{
+		SDL_HapticRunEffect(haptic, effects.effect_constant_id, SDL_HAPTIC_INFINITY);
+		isConstantEffectRunning = true;
+	}
 
+}
+
+void TriggerConstantTimedEffect(int direction, double strength)
+{
+	SDL_HapticEffect tempEffect;
+	SDL_memset(&tempEffect, 0, sizeof(SDL_HapticEffect));
+	tempEffect.type = SDL_HAPTIC_CONSTANT;
+	tempEffect.constant.direction.type = SDL_HAPTIC_CARTESIAN;
+	tempEffect.constant.direction.dir[0] = direction;
+	tempEffect.constant.length = configFeedbackLength;
+	tempEffect.constant.delay = 0;
+
+	int confMinForce = configMinForce;
+	int confMaxForce = configMaxForce;
+
+	if (AlternativeFFB)
+	{
+		if (direction == -1)
+		{
+			confMinForce = configAlternativeMinForceLeft;
+			confMaxForce = configAlternativeMaxForceLeft;
+		}
+		else
+		{
+			confMinForce = configAlternativeMinForceRight;
+			confMaxForce = configAlternativeMaxForceRight;
+		}
+	}
+
+	if (PowerMode)
+		strength = pow(strength, 0.5);
+
+	if (DoubleConstant)
+	{
+		strength = strength * 2.0;
+
+		if (strength > 1.0)
+			strength = 1.0;
+	}
+
+	SHORT MinForce = (SHORT)(strength > 0.001 ? (confMinForce / 100.0 * 32767.0) : 0);
+	SHORT MaxForce = (SHORT)(confMaxForce / 100.0 * 32767.0);
+	SHORT range = MaxForce - MinForce;
+	SHORT level = (SHORT)(strength * range + MinForce);
+
+	if (range > 0 && level < 0)
+		level = 32767;
+	else if (range < 0 && level > 0)
+		level = -32767;
+
+	tempEffect.constant.level = level;
+
+	SDL_HapticUpdateEffect(haptic, effects.effect_constant_id, &tempEffect);
+	SDL_HapticRunEffect(haptic, effects.effect_constant_id, 1);
 }
 
 void TriggerFrictionEffectWithDefaultOption(double strength, bool isDefault)
@@ -2369,6 +2423,7 @@ DWORD WINAPI FFBLoop(LPVOID lpParam)
 
 	// assign FFB effects here
 	t.Constant = &TriggerConstantEffect;
+	t.ConstantTimed = &TriggerConstantTimedEffect;
 	t.Spring = &TriggerSpringEffect;
 	t.Friction = &TriggerFrictionEffect;
 	t.Sine = &TriggerSineEffect;
